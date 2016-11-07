@@ -12,7 +12,7 @@
 
 #include "catalog/pg_control.h"
 
-#ifndef WIN32
+#ifdef __linux__
 #include "linux/version.h"
 #endif
 
@@ -23,8 +23,10 @@
 	(__GLIBC__ > major || (__GLIBC__ == major && __GLIBC_MINOR__ >= minor))
 
 #ifndef HAVE_SYNC_FILE_RANGE
+#ifdef __linux__
 #if (LINUX_VERSION_AT_LEAST(2,6,17) && GLIBC_VERSION_AT_LEAST(2,6))
 #define HAVE_SYNC_FILE_RANGE
+#endif
 #endif
 #endif
 

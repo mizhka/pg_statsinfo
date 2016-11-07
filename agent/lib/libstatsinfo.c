@@ -1693,8 +1693,10 @@ statsinfo_restart(PG_FUNCTION_ARGS)
 #define NUM_STAT_FIELDS_MIN		6
 
 /* not support a kernel that does not have the required fields at "/proc/stat" */
-#if !LINUX_VERSION_AT_LEAST(2,5,41)
+#ifdef __linux__
+#if!LINUX_VERSION_AT_LEAST(2,5,41)
 #error kernel version 2.5.41 or later is required
+#endif
 #endif
 
 /*

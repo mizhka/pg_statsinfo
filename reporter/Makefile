@@ -16,7 +16,7 @@ OBJS = $(SRCS:.c=.o)
 PROGRAM = pg_statsinfo
 
 PG_CPPFLAGS = -I$(libpq_srcdir)
-PG_LIBS = $(libpq)
+PG_LIBS = $(libpq) -lintl
 
 ifndef USE_PGXS
 top_builddir = ../../..

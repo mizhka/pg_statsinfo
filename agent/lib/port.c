@@ -8,7 +8,12 @@
 
 #ifndef WIN32
 
+#ifdef __linux__
 #include <sys/statfs.h>
+#elif defined(__FreeBSD__)
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
 #include <unistd.h>
 
 bool
