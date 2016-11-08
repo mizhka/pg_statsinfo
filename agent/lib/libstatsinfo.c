@@ -515,8 +515,10 @@ sample_activity(void)
 		 */
 		if (be->st_procpid == MyProcPid)
 			;	/* exclude myself */
+#if PG_VERSION_NUM < 90600
 		else if (be->st_waiting)
 			waiting++;
+#endif
 #if PG_VERSION_NUM >= 90200
 		else if (be->st_state == STATE_IDLE)
 			idle++;
@@ -536,17 +538,6 @@ sample_activity(void)
 		}
 #endif
 
-		/*
-		 * sample long transactions, but exclude vacuuming processes.
-		 */
-		if (be->st_xact_start_timestamp == 0)
-			continue;
-
-		TimestampDifference(be->st_xact_start_timestamp, now, &secs, &usecs);
-		duration = secs + usecs / 1000000.0;
-		if (duration < LONG_TRANSACTION_THRESHOLD)
-			continue;
-
 		/* XXX: needs lock? */
 #if PG_VERSION_NUM >= 90200
 		if ((proc = BackendPidGetProc(be->st_procpid)) == NULL ||
@@ -557,6 +548,22 @@ sample_activity(void)
 			(proc->vacuumFlags & PROC_IN_VACUUM))
 			continue;
 #endif
+
+#if PG_VERSION_NUM >= 90600
+		if (proc->wait_event_info > 0)
+			waiting++;
+#endif
+
+		/*
+		 * sample long transactions, but exclude vacuuming processes.
+		 */
+		if (be->st_xact_start_timestamp == 0)
+			continue;
+
+		TimestampDifference(be->st_xact_start_timestamp, now, &secs, &usecs);
+		duration = secs + usecs / 1000000.0;
+		if (duration < LONG_TRANSACTION_THRESHOLD)
+			continue;
 
 		/* set up key for hashtable search */
 		key.pid = be->st_procpid;
